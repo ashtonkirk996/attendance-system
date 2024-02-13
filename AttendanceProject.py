@@ -5,7 +5,7 @@ import os
 from datetime import datetime
 
 # create a list of filenames in the face image folder
-path = 'Face_Images'
+path = 'attendance-system/Face_Images'
 images = []
 classNames = []
 fileNameList = os.listdir(path)
@@ -24,6 +24,20 @@ def findEncodings(images):
         encode = face_recognition.face_encodings(img)[0]
         encodeList.append(encode)
     return encodeList
+
+# record the name and time of a detected person inside a csv file
+def markAttendance(name):
+    with open('attendance-system/Attendance.csv','r+') as f:
+        myDataList = f.readlines()
+        nameList = []
+        for line in myDataList:
+            entry = line.split(',')
+            nameList.append(entry[0])
+        if name not in nameList:
+            now = datetime.now()
+            dtString = now.strftime('%H:%M:%S')
+            f.writelines(f'\n{name},{dtString}')
+            
 
 # generate a list of encodings for the images
 encodeList =  findEncodings(images)
@@ -52,7 +66,8 @@ while True:
            cv2.rectangle(img,(x1,y1),(x2,y2), (0,255,0),2)
            cv2.rectangle(img,(x1,y2-35),(x2,y2), (0,255,0), cv2.FILLED)
            cv2.putText(img, name,(x1+6, y2-6), cv2.FONT_HERSHEY_SIMPLEX,1,(255,255,255),2)
-       
+           markAttendance(name)
+
 #show the webcam on-screen
     cv2.imshow('WebCam',img)
     cv2.waitKey(1)
